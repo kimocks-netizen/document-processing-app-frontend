@@ -1,0 +1,73 @@
+project-root/
+├── app/                            # App Router pages
+│   ├── layout.tsx                   # Root layout (theme + Redux provider)
+│   ├── page.tsx                     # Upload page (default route "/")
+│   ├── results/
+│   │   └── [jobId]/page.tsx         # Dynamic results page
+│   ├── documents/
+│   │   └── page.tsx                 # View info page (future: gated with login) 
+│   ├── api/                         # Optional serverless functions (Next API routes)
+│   │   ├── ping/route.ts            # Route (health check)
+│   │   └── upload/route.ts          # Optional wrapper to call Express or Supabase
+│   └── globals.css                  # Tailwind global styles
+│
+├── components/                      # Reusable UI components
+│   ├── forms/
+│   │   └── UploadForm.tsx           # File upload form 
+│   ├── results/ 
+│   │   ├── StandardPanel.tsx        # Standard extraction results
+│   │   ├── AIPanel.tsx              # AI extraction results
+│   │   └── CompareView.tsx          # Side-by-side view
+│   ├── common/
+│   │   ├── Navbar.tsx               # Navbar with toggle and links
+│   │   ├── ProgressBar.tsx          # Job progress indicator
+│   │   ├── FileDropzone.tsx         # Drag-and-drop upload 
+│   │   └── ErrorBanner.tsx          # Error UI
+│
+├── store/                           # Redux store
+│   ├── index.ts                     # Store setup with configureStore
+│   ├── hooks.ts                     # Typed useDispatch/useSelector hooks
+│   └── slices/                      # RTK slices for state domains
+│       ├── themeSlice.ts
+│       ├── uploadSlice.ts
+│       ├── jobSlice.ts
+│       ├── resultsSlice.ts
+│       └── userSlice.ts             # For future login/auth state
+│
+├── lib/                             # Helpers, utilities, API services
+│   ├── api.ts                       # Axios or fetch wrapper for Express API
+│   ├── validators.ts                # Zod schemas for form validation
+│   ├── mappers.ts                   # Map API data → UI types
+│   ├── constants.ts                 # API endpoints, status enums
+│   └── ws.ts                        # WebSocket (or Supabase Realtime) connection
+│
+├── layout/                          # Theme & layout configs
+│   ├── ThemeProvider.tsx            # Dark/light theme wrapper
+│   ├── palettes.ts                  # Glossy black/red colors config
+│   ├── darkMode.ts                  # Utility hooks for dark mode
+│   └── Providers.tsx                # Redux + Theme provider composition
+│
+├── ui/                              # shadcn components (customized)
+│   ├── button.tsx
+│   ├── card.tsx
+│   ├── toggle.tsx
+│   ├── tabs.tsx
+│   └── modal.tsx
+│
+├── hooks/                           # Custom React hooks
+│   ├── useWebSocket.ts              # Job progress subscription
+│   ├── useSupabase.ts               # DB or storage helper
+│   └── useThemeToggle.ts            # Dark/light toggle logic
+│
+├── styles/
+│   ├── globals.css
+│   └── tailwind.css
+│
+├── assets/
+│   ├── logos/
+│   └── icons/
+│
+├── .env.local                       # API keys (e.g., GEMINI_API_KEY)
+├── tailwind.config.js
+├── postcss.config.js
+└── next.config.js

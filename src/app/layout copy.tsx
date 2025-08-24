@@ -1,7 +1,7 @@
 // frontend/app/layout.tsx
 import './globals.css';
 import { Inter } from 'next/font/google';
-import { Providers } from '@/layout/Providers';
+import { ThemeProvider } from '../layout/ThemeContext';
 import Layout from '@/components/Layout';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -19,11 +19,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <Providers>
+        <ThemeProvider>
           <Layout>
             {children}
           </Layout>
-        </Providers>
+        </ThemeProvider>
       </body>
     </html>
   );
