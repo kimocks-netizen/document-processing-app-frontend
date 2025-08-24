@@ -4,16 +4,15 @@ import { Card, CardContent } from '@/components/ui/card';
 interface ProgressBarProps {
   progress: number;
   status: string;
-  isPdf?: boolean;
 }
 
-const ProgressBar: React.FC<ProgressBarProps> = ({ progress, status, isPdf = false }) => {
+const ProgressBar: React.FC<ProgressBarProps> = ({ progress, status }) => {
   return (
     <Card>
       <CardContent className="pt-6">
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="font-medium">Processing Document</span>
+            <span className="font-medium">Processing</span>
             <span className="text-gray-500">{progress}%</span>
           </div>
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
@@ -23,11 +22,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress, status, isPdf = fal
             ></div>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">{status}</p>
-          {isPdf && progress < 100 && (
-            <p className="text-xs text-yellow-600 dark:text-yellow-400">
-              PDF OCR processing may take several minutes for large documents...
-            </p>
-          )}
         </div>
       </CardContent>
     </Card>

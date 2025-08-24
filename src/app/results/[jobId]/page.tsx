@@ -1,4 +1,4 @@
-// frontend/app/results/[jobId]/page.tsx
+// src/app/results/[jobId]/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -21,6 +21,7 @@ interface ProcessingResult {
   aiExtractedData?: any;
   processingMethod: 'standard' | 'ai';
   progress?: number;
+  fileName?: string;
 }
 
 interface AIExtractedData {
@@ -285,7 +286,11 @@ export default function ResultsPage() {
       </div>
 
       {result.status === 'processing' && (
-        <ProgressBar progress={result.progress || 0} status="Extracting text from document..." />
+        <ProgressBar 
+          progress={result.progress || 0} 
+          status="Extracting text from document..."
+          isPdf={result.fileName?.endsWith?.('.pdf')}
+        />
       )}
 
       {result.status === 'completed' && (
