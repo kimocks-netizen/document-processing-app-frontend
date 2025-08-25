@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FileText, Clock, CheckCircle, XCircle, ChevronUp, ChevronDown, SortAsc, Search, Download, Calendar, User, BarChart3 } from 'lucide-react';
+import { FileText, Clock, CheckCircle, XCircle, ChevronUp, ChevronDown, SortAsc, Search, Download, Calendar, User, BarChart3, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,6 +30,9 @@ export default function ResultsPage() {
   const [selectedJobForComparison, setSelectedJobForComparison] = useState<ProcessingJob | null>(null);
   const [comparisonData, setComparisonData] = useState<any>(null);
   const [loadingComparison, setLoadingComparison] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState<ProcessingJob | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchAllJobs();
@@ -126,6 +129,41 @@ export default function ResultsPage() {
   const closeComparisonModal = () => {
     setIsComparisonModalOpen(false);
     setSelectedJobForComparison(null);
+  };
+
+  const handleDelete = (job: ProcessingJob) => {
+    setJobToDelete(job);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!jobToDelete) return;
+    
+    setDeleting(true);
+    try {
+      const response = await fetch(`http://localhost:3001/api/results/${jobToDelete.jobId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Remove the deleted job from the local state
+        setJobs(prevJobs => prevJobs.filter(job => job.jobId !== jobToDelete.jobId));
+        setIsDeleteModalOpen(false);
+        setJobToDelete(null);
+      } else {
+        throw new Error('Failed to delete job');
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Failed to delete job. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setJobToDelete(null);
   };
 
   if (loading) {
@@ -257,21 +295,32 @@ export default function ResultsPage() {
                         </div>
                         <div className="flex items-center space-x-2">
                           <Link href={`/results/${job.jobId}`}>
-                            <Button size="sm" className="hover:scale-105 transition-transform duration-200">
+                            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white hover:scale-105 transition-transform duration-200">
                               View Results
                             </Button>
                           </Link>
-                          {job.processingMethod === 'ai' && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleComparison(job)}
-                              className="hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-200"
-                            >
-                              <BarChart3 className="w-4 h-4 mr-1" />
-                              Comparison
-                            </Button>
-                          )}
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleComparison(job)}
+                            disabled={job.processingMethod === 'standard'}
+                            className={`transition-all duration-200 ${
+                              job.processingMethod === 'ai' 
+                                ? 'hover:bg-green-50 hover:border-green-300 hover:text-green-600 border-green-300 text-green-600' 
+                                : 'border-gray-300 text-gray-400 cursor-not-allowed bg-gray-100'
+                            }`}
+                          >
+                            <BarChart3 className="w-4 h-4 mr-1" />
+                            Comparison
+                          </Button>
+                          <Button 
+                            size="sm"
+                            onClick={() => handleDelete(job)}
+                            className="bg-red-600 hover:bg-red-700 text-white hover:scale-105 transition-transform duration-200"
+                          >
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            Delete
+                          </Button>
                         </div>
                       </div>
                       
@@ -578,6 +627,50 @@ export default function ResultsPage() {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={cancelDelete}
+        title="Delete Job"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <div className="text-center">
+            <Trash2 className="w-16 h-16 mx-auto text-red-500 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              Delete Processing Job
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to delete the job for <strong>{jobToDelete?.fileName}</strong>?
+            </p>
+            <p className="text-sm text-red-600 dark:text-red-400 mt-2">
+              This action cannot be undone. All processing results will be permanently deleted.
+            </p>
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-600">
+            <Button variant="outline" onClick={cancelDelete} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDelete} 
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {deleting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Deleting...
+                </>
+              ) : (
+                'Delete Job'
+              )}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
