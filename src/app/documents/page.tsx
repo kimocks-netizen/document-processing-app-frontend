@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, FileText, Calendar, User, Download } from 'lucide-react';
+import Link from 'next/link';
 
 // Mock data for demonstration
 const mockDocuments = [
@@ -39,15 +40,89 @@ const mockDocuments = [
     fullName: 'Robert Johnson',
     fileSize: '3.2 MB'
   },
+  {
+    id: '4',
+    fileName: 'invoice.pdf',
+    uploadDate: '2024-01-12',
+    processedDate: '2024-01-12',
+    status: 'completed',
+    processingMethod: 'ai',
+    fullName: 'Alice Brown',
+    fileSize: '1.5 MB'
+  },
+  {
+    id: '5',
+    fileName: 'receipt.jpg',
+    uploadDate: '2024-01-11',
+    processedDate: '2024-01-11',
+    status: 'completed',
+    processingMethod: 'standard',
+    fullName: 'Charlie Wilson',
+    fileSize: '0.8 MB'
+  },
+  {
+    id: '6',
+    fileName: 'report.pdf',
+    uploadDate: '2024-01-10',
+    processedDate: '2024-01-10',
+    status: 'completed',
+    processingMethod: 'ai',
+    fullName: 'Diana Davis',
+    fileSize: '4.1 MB'
+  },
+  {
+    id: '7',
+    fileName: 'scan.pdf',
+    uploadDate: '2024-01-09',
+    processedDate: '2024-01-09',
+    status: 'completed',
+    processingMethod: 'standard',
+    fullName: 'Eve Miller',
+    fileSize: '2.7 MB'
+  },
+  {
+    id: '8',
+    fileName: 'photo.png',
+    uploadDate: '2024-01-08',
+    processedDate: '2024-01-08',
+    status: 'completed',
+    processingMethod: 'ai',
+    fullName: 'Frank Garcia',
+    fileSize: '3.9 MB'
+  }
 ];
 
 export default function DocumentsPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   const filteredDocuments = mockDocuments.filter(doc =>
     doc.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     doc.fullName.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Pagination
+  const totalPages = Math.ceil(filteredDocuments.length / itemsPerPage);
+  const displayedDocuments = filteredDocuments.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handleDownload = (doc: any) => {
+    // TODO: Implement actual download functionality
+    console.log('Downloading:', doc.fileName);
+    // This would typically call an API endpoint to get the file
+    // For now, we'll show an alert
+    alert(`Downloading ${doc.fileName}...`);
+  };
+
+  const handleViewResults = (doc: any) => {
+    // TODO: Navigate to results page or show results modal
+    console.log('Viewing results for:', doc.fileName);
+    // This would typically navigate to a results page
+    alert(`Viewing results for ${doc.fileName}...`);
+  };
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -71,7 +146,7 @@ export default function DocumentsPage() {
         </div>
       </div>
 
-      <Card>
+      <Card className="hover:shadow-lg transition-all duration-300">
         <CardHeader>
           <CardTitle>Document History</CardTitle>
           <CardDescription>
@@ -80,8 +155,8 @@ export default function DocumentsPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredDocuments.map((doc) => (
-              <Card key={doc.id} className="bg-gray-50 dark:bg-gray-800">
+            {displayedDocuments.map((doc) => (
+              <Card key={doc.id} className="bg-gray-50 dark:bg-gray-800 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 cursor-pointer">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
@@ -91,16 +166,25 @@ export default function DocumentsPage() {
                       <div>
                         <h3 className="font-medium">{doc.fileName}</h3>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {doc.fileSize} • {doc.processingMethod.toUpperCase()} processing
+                          {doc.fileSize} • {doc.processingMethod === 'ai' ? 'AI Extraction' : 'Standard Extraction'} processing
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleDownload(doc)}
+                        className="hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-200"
+                      >
                         <Download className="w-4 h-4 mr-1" />
                         Download
                       </Button>
-                      <Button size="sm">
+                      <Button 
+                        size="sm"
+                        onClick={() => handleViewResults(doc)}
+                        className="hover:scale-105 transition-transform duration-200"
+                      >
                         View Results
                       </Button>
                     </div>
@@ -138,6 +222,51 @@ export default function DocumentsPage() {
               </div>
             )}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex flex-wrap justify-between items-center gap-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  size="sm"
+                  className="hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-200"
+                >
+                  Previous
+                </Button>
+                
+                <div className="flex flex-wrap justify-center gap-1 overflow-x-auto max-w-full">
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <Button
+                      key={i + 1}
+                      variant={currentPage === i + 1 ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(i + 1)}
+                      className={`w-8 h-8 p-0 ${
+                        currentPage === i + 1 
+                          ? '' 
+                          : 'hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-200'
+                      }`}
+                    >
+                      {i + 1}
+                    </Button>
+                  ))}
+                </div>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage >= totalPages}
+                  size="sm"
+                  className="hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-200"
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

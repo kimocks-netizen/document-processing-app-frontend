@@ -2,182 +2,175 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Upload, FileText, ImageIcon } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { FileText, Upload, BarChart3, History, Brain, Cog } from 'lucide-react';
+import Link from 'next/link';
 
-export default function UploadPage() {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    dob: '',
-    processingMethod: 'standard',
-  });
-  const [file, setFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const router = useRouter();
+export default function HomePage() {
+  const [isHovered, setIsHovered] = useState<string | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+  const features = [
+    {
+      icon: <Brain className="w-8 h-8 text-red-600" />,
+      title: "AI-Powered Extraction",
+      description: "Advanced AI algorithms for intelligent document data extraction and analysis"
+    },
+    {
+      icon: <Cog className="w-8 h-8 text-red-600" />,
+      title: "Standard Processing",
+      description: "Reliable traditional document processing for consistent results"
+    },
+    {
+      icon: <FileText className="w-8 h-8 text-red-600" />,
+      title: "Multiple Formats",
+      description: "Support for PDF, JPG, PNG and other document formats"
     }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file) {
-      alert('Please select a file to upload');
-      return;
-    }
-
-    setIsUploading(true);
-    
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append('file', file);
-      formDataToSend.append('firstName', formData.firstName);
-      formDataToSend.append('lastName', formData.lastName);
-      formDataToSend.append('dob', formData.dob);
-      formDataToSend.append('processingMethod', formData.processingMethod);
-
-      const response = await fetch('http://localhost:3001/api/upload', {
-        method: 'POST',
-        body: formDataToSend,
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        router.push(`/results/${result.jobId}`);
-      } else {
-        throw new Error('Upload failed');
-      }
-    } catch (error) {
-      console.error('Upload error:', error);
-      alert('Upload failed. Please try again.');
-    } finally {
-      setIsUploading(false);
-    }
-  };
+  ];
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8 text-center">Document Upload</h1>
-      
-      <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              First Name
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
-            />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      {/* Hero Section */}
+      <div className="text-center py-20 px-4">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+            Welcome to{' '}
+            <span className="bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
+              DocProcessor
+            </span>
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto">
+            Transform your documents into structured data with our advanced AI-powered extraction capabilities. 
+            Process PDFs, images, and more with intelligent automation.
+          </p>
+          
+          {/* Main Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+            <Link href="/upload">
+              <Button 
+                size="lg" 
+                className="text-lg px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                <Upload className="w-6 h-6 mr-3" />
+                Upload Document
+              </Button>
+            </Link>
+            <Link href="/results">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="text-lg px-8 py-4 border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                <BarChart3 className="w-6 h-6 mr-3" />
+                View Results
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Features Section */}
+      <div className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Powerful Features
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300">
+              Everything you need for efficient document processing
+            </p>
           </div>
           
-          <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Last Name
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label htmlFor="dob" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Date of Birth
-          </label>
-          <input
-            type="date"
-            id="dob"
-            name="dob"
-            value={formData.dob}
-            onChange={handleInputChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="processingMethod" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Processing Method
-          </label>
-          <select
-            id="processingMethod"
-            name="processingMethod"
-            value={formData.processingMethod}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
-          >
-            <option value="standard">Standard Extraction</option>
-            <option value="ai">AI Extraction</option>
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="file" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Document File (PDF or Image)
-          </label>
-          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md">
-            <div className="space-y-1 text-center">
-              {file ? (
-                <div className="flex items-center justify-center">
-                  {file.type.includes('image') ? <ImageIcon className="w-8 h-8 mr-2" /> : <FileText className="w-8 h-8 mr-2" />}
-                  <span className="text-sm text-gray-600 dark:text-gray-300">{file.name}</span>
-                </div>
-              ) : (
-                <>
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="flex text-sm text-gray-600 dark:text-gray-400">
-                    <label
-                      htmlFor="file"
-                      className="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-red-600 hover:text-red-500 focus-within:outline-none"
-                    >
-                      <span>Upload a file</span>
-                      <input
-                        id="file"
-                        name="file"
-                        type="file"
-                        className="sr-only"
-                        onChange={handleFileChange}
-                        accept=".pdf,.jpg,.jpeg,.png"
-                      />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <Card 
+                key={index}
+                className={`transform transition-all duration-300 hover:scale-105 cursor-pointer ${
+                  isHovered === `feature-${index}` 
+                    ? 'shadow-2xl border-red-300 dark:border-red-600' 
+                    : 'shadow-lg hover:shadow-xl'
+                }`}
+                onMouseEnter={() => setIsHovered(`feature-${index}`)}
+                onMouseLeave={() => setIsHovered(null)}
+              >
+                <CardHeader className="text-center pb-4">
+                  <div className="mx-auto mb-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-full w-16 h-16 flex items-center justify-center">
+                    {feature.icon}
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">PDF, JPG, PNG up to 10MB</p>
-                </>
-              )}
-            </div>
+                  <CardTitle className="text-xl text-gray-900 dark:text-white">
+                    {feature.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <CardDescription className="text-gray-600 dark:text-gray-400 text-base">
+                    {feature.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
+      </div>
 
-        <Button
-          type="submit"
-          disabled={isUploading}
-          className="w-full"
-        >
-          {isUploading ? 'Processing...' : 'Upload Document'}
-        </Button>
-      </form>
+      {/* Quick Actions Section */}
+      <div className="py-20 px-4 bg-white dark:bg-gray-800">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
+            Get Started Today
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <Link href="/documents">
+              <Card 
+                className={`transform transition-all duration-300 hover:scale-105 cursor-pointer ${
+                  isHovered === 'history' 
+                    ? 'shadow-2xl border-red-300 dark:border-red-600' 
+                    : 'shadow-lg hover:shadow-xl'
+                }`}
+                onMouseEnter={() => setIsHovered('history')}
+                onMouseLeave={() => setIsHovered(null)}
+              >
+                <CardContent className="p-8 text-center">
+                  <History className="w-16 h-16 text-red-600 mx-auto mb-4" />
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                    Document History
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    View and manage all your previously processed documents
+                  </p>
+                  <Button variant="outline" className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white">
+                    View History
+                  </Button>
+                </CardContent>
+              </Card>
+            </Link>
+            
+            <Link href="/upload">
+              <Card 
+                className={`transform transition-all duration-300 hover:scale-105 cursor-pointer ${
+                  isHovered === 'upload' 
+                    ? 'shadow-2xl border-red-300 dark:border-red-600' 
+                    : 'shadow-lg hover:shadow-xl'
+                }`}
+                onMouseEnter={() => setIsHovered('upload')}
+                onMouseLeave={() => setIsHovered(null)}
+              >
+                <CardContent className="p-8 text-center">
+                  <Upload className="w-16 h-16 text-red-600 mx-auto mb-4" />
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                    Process New Document
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    Upload and process new documents with AI or standard extraction
+                  </p>
+                  <Button className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800">
+                    Start Processing
+                  </Button>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

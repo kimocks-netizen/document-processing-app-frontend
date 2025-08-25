@@ -1,0 +1,19 @@
+ If AI method is used, display both Standard and AI extraction results side-by-side
+add search, -DONE
+delete, 
+Download functionality
+filters(Sorts), by ai, standard,image extractions, -DONE
+login, -no longer neccessary
+paginations, -DONE
+progress bar moving footer -DONE
+hover effects, -DONE
+fix buttons to use colour mixing - DONE
+improve buttons on nav - DONE
+mobile nav -DONE
+time taken to extract document 
+date created -DONE
+READ ME
+Docker
+Deploy
+Report Data Amalysise Reports  and downloadble 
+e.g 5 documents where genrated 2 from ai, 1 ai image, ocr standad and ai etc

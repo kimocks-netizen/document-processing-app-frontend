@@ -4,6 +4,7 @@
 import React from 'react';
 import { useTheme } from '../layout/ThemeContext';
 import Navbar from './common/Navbar';
+import Footer from './common/Footer';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -18,6 +19,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <main className="flex-grow container mx-auto px-4 py-8">
         {children}
       </main>
+      <Footer />
     </div>
   );
 };
