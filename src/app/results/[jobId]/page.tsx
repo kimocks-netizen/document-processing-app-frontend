@@ -24,7 +24,7 @@ interface ProcessingResult {
 }
 
 interface AIExtractedData {
-  personalInfo?: {
+  importantInfo?: {
     fullName?: string;
     dateOfBirth?: string;
     age?: number;
@@ -52,6 +52,16 @@ export default function ResultsPage() {
       const response = await fetch(`http://localhost:3001/api/results/${jobId}`);
       if (response.ok) {
         const data = await response.json();
+        
+        // Calculate progress based on status
+        if (data.status === 'processing') {
+          data.progress = 70; // Show 70% while processing
+        } else if (data.status === 'completed') {
+          data.progress = 100;
+        } else {
+          data.progress = 10;
+        }
+        
         setResult(data);
         setError(null);
       } else {
@@ -75,145 +85,155 @@ export default function ResultsPage() {
     }
   }, [jobId, result?.status]);
 
-  const renderAIResults = (aiData: AIExtractedData) => {
-    if (!aiData) return null;
+const renderAIResults = (aiData: AIExtractedData) => {
+  if (!aiData) return null;
 
-    return (
-      <div className="space-y-6">
-        {/* Personal Info */}
-        {aiData.personalInfo && (
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <User className="w-5 h-5 mr-2 text-blue-500" />
-                Personal Information
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {aiData.personalInfo.fullName && (
+  return (
+    <div className="space-y-6">
+      {/* Important Information */}
+      {(aiData.importantInfo || aiData.contactInfo) && (
+        <Card>
+          <CardContent className="pt-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-blue-500" />
+              Important Information
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Extracted details */}
+              <div className="space-y-4">
+                {aiData.importantInfo?.fullName && (
                   <div>
-                    <span className="text-sm text-gray-500">Full Name</span>
-                    <p className="font-medium">{aiData.personalInfo.fullName}</p>
+                    <span className="text-sm text-gray-500 block mb-1">Name</span>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {aiData.importantInfo.fullName}
+                    </p>
                   </div>
                 )}
-                {aiData.personalInfo.dateOfBirth && (
+                
+                {aiData.importantInfo?.dateOfBirth && (
                   <div>
-                    <span className="text-sm text-gray-500">Date of Birth</span>
-                    <p className="font-medium">{aiData.personalInfo.dateOfBirth}</p>
+                    <span className="text-sm text-gray-500 block mb-1">Date of Birth</span>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {aiData.importantInfo.dateOfBirth}
+                    </p>
                   </div>
                 )}
-                {aiData.personalInfo.age && (
+                
+                {aiData.importantInfo?.age && (
                   <div>
-                    <span className="text-sm text-gray-500">Age</span>
-                    <p className="font-medium">{aiData.personalInfo.age} years</p>
+                    <span className="text-sm text-gray-500 block mb-1">Age</span>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {aiData.importantInfo.age} years
+                    </p>
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
-        )}
 
-        {/* Contact Info */}
-        {aiData.contactInfo && 
-         ((aiData.contactInfo.emails && aiData.contactInfo.emails.length > 0) || 
-          (aiData.contactInfo.phoneNumbers && aiData.contactInfo.phoneNumbers.length > 0)) && (
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <Mail className="w-5 h-5 mr-2 text-green-500" />
-                Contact Information
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {aiData.contactInfo.emails && aiData.contactInfo.emails.length > 0 && (
+              {/* Contact information */}
+              <div className="space-y-4">
+                {aiData.contactInfo?.emails && aiData.contactInfo.emails.length > 0 && (
                   <div>
-                    <span className="text-sm text-gray-500">Email Addresses</span>
+                    <span className="text-sm text-gray-500 block mb-1">Email Addresses</span>
                     <div className="space-y-1">
                       {aiData.contactInfo.emails.map((email, index) => (
-                        <p key={index} className="font-medium">{email}</p>
+                        <p key={index} className="font-medium text-gray-900 dark:text-white">
+                          {email}
+                        </p>
                       ))}
                     </div>
                   </div>
                 )}
-                {aiData.contactInfo.phoneNumbers && aiData.contactInfo.phoneNumbers.length > 0 && (
+                
+                {aiData.contactInfo?.phoneNumbers && aiData.contactInfo.phoneNumbers.length > 0 && (
                   <div>
-                    <span className="text-sm text-gray-500">Phone Numbers</span>
+                    <span className="text-sm text-gray-500 block mb-1">Phone Numbers</span>
                     <div className="space-y-1">
                       {aiData.contactInfo.phoneNumbers.map((phone, index) => (
-                        <p key={index} className="font-medium">{phone}</p>
+                        <p key={index} className="font-medium text-gray-900 dark:text-white">
+                          {phone}
+                        </p>
                       ))}
                     </div>
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        {/* Addresses */}
-        {aiData.addresses && aiData.addresses.length > 0 && (
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <MapPin className="w-5 h-5 mr-2 text-red-500" />
-                Addresses
-              </h3>
-              <div className="space-y-2">
-                {aiData.addresses.map((address, index) => (
-                  <p key={index} className="font-medium">{address}</p>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      {/* Addresses */}
+      {aiData.addresses && aiData.addresses.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center">
+              <MapPin className="w-5 h-5 mr-2 text-red-500" />
+              Addresses
+            </h3>
+            <div className="space-y-2">
+              {aiData.addresses.map((address, index) => (
+                <p key={index} className="font-medium text-gray-900 dark:text-white">
+                  {address}
+                </p>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        {/* Identification Numbers */}
-        {aiData.identificationNumbers && aiData.identificationNumbers.length > 0 && (
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <IdCard className="w-5 h-5 mr-2 text-purple-500" />
-                Identification Numbers
-              </h3>
-              <div className="space-y-2">
-                {aiData.identificationNumbers.map((id, index) => (
-                  <p key={index} className="font-medium">{id}</p>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      {/* Identification Numbers */}
+      {aiData.identificationNumbers && aiData.identificationNumbers.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center">
+              <IdCard className="w-5 h-5 mr-2 text-purple-500" />
+              Identification Numbers
+            </h3>
+            <div className="space-y-2">
+              {aiData.identificationNumbers.map((id, index) => (
+                <p key={index} className="font-medium text-gray-900 dark:text-white">
+                  {id}
+                </p>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        {/* Key Dates */}
-        {aiData.keyDates && aiData.keyDates.length > 0 && (
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <Clock className="w-5 h-5 mr-2 text-yellow-500" />
-                Important Dates
-              </h3>
-              <div className="space-y-2">
-                {aiData.keyDates.map((date, index) => (
-                  <p key={index} className="font-medium">{date}</p>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      {/* Key Dates */}
+      {aiData.keyDates && aiData.keyDates.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center">
+              <Clock className="w-5 h-5 mr-2 text-yellow-500" />
+              Important Dates
+            </h3>
+            <div className="space-y-2">
+              {aiData.keyDates.map((date, index) => (
+                <p key={index} className="font-medium text-gray-900 dark:text-white">
+                  {date}
+                </p>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        {/* Summary */}
-        {aiData.summary && (
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <FileText className="w-5 h-5 mr-2 text-gray-500" />
-                Document Summary
-              </h3>
-              <p className="text-gray-700 dark:text-gray-300">{aiData.summary}</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    );
-  };
+      {/* Summary */}
+      {aiData.summary && (
+        <Card>
+          <CardContent className="pt-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-gray-500" />
+              Document Summary
+            </h3>
+            <p className="text-gray-700 dark:text-gray-300">{aiData.summary}</p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+};
 
   if (loading) {
     return (
