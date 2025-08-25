@@ -17,3 +17,5 @@ Docker
 Deploy
 Report Data Amalysise Reports  and downloadble 
 e.g 5 documents where genrated 2 from ai, 1 ai image, ocr standad and ai etc
+
+remove: https://api.yourdomain.com

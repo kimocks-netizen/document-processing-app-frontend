@@ -40,7 +40,7 @@ export default function ResultsPage() {
 
   const fetchAllJobs = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/results');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.yourdomain.com'}/api/results`);
       if (response.ok) {
         const data = await response.json();
         setJobs(data.jobs || []);
@@ -110,7 +110,7 @@ export default function ResultsPage() {
     
     try {
       // Fetch the actual processing results for this job
-      const response = await fetch(`http://localhost:3001/api/results/${job.jobId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.yourdomain.com'}/api/results/${job.jobId}`);
       if (response.ok) {
         const data = await response.json();
         setComparisonData(data);
@@ -141,7 +141,7 @@ export default function ResultsPage() {
     
     setDeleting(true);
     try {
-      const response = await fetch(`http://localhost:3001/api/results/${jobToDelete.jobId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.yourdomain.com'}/api/results/${jobToDelete.jobId}`, {
         method: 'DELETE',
       });
 
@@ -232,7 +232,7 @@ export default function ResultsPage() {
                 <Button
                   variant="outline"
                   onClick={handleSortToggle}
-                  className="flex items-center space-x-2 hover:bg-red-50 hover:border-red-300 transition-all duration-200"
+                  className="flex items-center space-x-2 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:border-red-300 transition-all duration-200"
                 >
                   <SortAsc className="w-4 h-4" />
                   <span>{sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}</span>
@@ -295,19 +295,18 @@ export default function ResultsPage() {
                         </div>
                         <div className="flex items-center space-x-2">
                           <Link href={`/results/${job.jobId}`}>
-                            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white hover:scale-105 transition-transform duration-200">
+                            <Button size="sm" className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white hover:scale-105 transition-transform duration-200 shadow-lg">
                               View Results
                             </Button>
                           </Link>
                           <Button 
-                            variant="outline" 
                             size="sm"
                             onClick={() => handleComparison(job)}
                             disabled={job.processingMethod === 'standard'}
                             className={`transition-all duration-200 ${
                               job.processingMethod === 'ai' 
-                                ? 'hover:bg-green-50 hover:border-green-300 hover:text-green-600 border-green-300 text-green-600' 
-                                : 'border-gray-300 text-gray-400 cursor-not-allowed bg-gray-100'
+                                ? 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white shadow-lg' 
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             }`}
                           >
                             <BarChart3 className="w-4 h-4 mr-1" />
@@ -316,7 +315,7 @@ export default function ResultsPage() {
                           <Button 
                             size="sm"
                             onClick={() => handleDelete(job)}
-                            className="bg-red-600 hover:bg-red-700 text-white hover:scale-105 transition-transform duration-200"
+                            className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white hover:scale-105 transition-transform duration-200 shadow-lg"
                           >
                             <Trash2 className="w-4 h-4 mr-1" />
                             Delete
@@ -357,7 +356,7 @@ export default function ResultsPage() {
                     onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
                     size="sm"
-                    className="hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-200"
+                    className="hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:border-red-300 hover:text-red-600 transition-all duration-200"
                   >
                     Previous
                   </Button>
@@ -369,11 +368,11 @@ export default function ResultsPage() {
                         variant={currentPage === i + 1 ? "default" : "outline"}
                         size="sm"
                         onClick={() => setCurrentPage(i + 1)}
-                        className={`w-8 h-8 p-0 ${
-                          currentPage === i + 1 
-                            ? '' 
-                            : 'hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-200'
-                        }`}
+                                              className={`w-8 h-8 p-0 ${
+                        currentPage === i + 1 
+                          ? '' 
+                          : 'hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:border-red-300 hover:text-red-600 transition-all duration-200'
+                      }`}
                       >
                         {i + 1}
                       </Button>
@@ -385,7 +384,7 @@ export default function ResultsPage() {
                     onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                     disabled={currentPage >= totalPages}
                     size="sm"
-                    className="hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-200"
+                    className="hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:border-red-300 hover:text-red-600 transition-all duration-200"
                   >
                     Next
                   </Button>
