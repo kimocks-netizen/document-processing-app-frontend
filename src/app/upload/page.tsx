@@ -16,23 +16,99 @@ export default function UploadPage() {
   });
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [touched, setTouched] = useState<{[key: string]: boolean}>({});
   const router = useRouter();
+
+  const validateForm = () => {
+    const newErrors: {[key: string]: string} = {};
+
+    // First Name validation
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'First name is required';
+    } else if (formData.firstName.trim().length < 2) {
+      newErrors.firstName = 'First name must be at least 2 characters';
+    } else if (!/^[a-zA-Z\s]+$/.test(formData.firstName.trim())) {
+      newErrors.firstName = 'First name can only contain letters and spaces';
+    }
+
+    // Last Name validation
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'Last name is required';
+    } else if (formData.lastName.trim().length < 2) {
+      newErrors.lastName = 'Last name must be at least 2 characters';
+    } else if (!/^[a-zA-Z\s]+$/.test(formData.lastName.trim())) {
+      newErrors.lastName = 'Last name can only contain letters and spaces';
+    }
+
+    // Date of Birth validation
+    if (!formData.dob) {
+      newErrors.dob = 'Date of birth is required';
+    } else {
+      const dobDate = new Date(formData.dob);
+      const today = new Date();
+      let age = today.getFullYear() - dobDate.getFullYear();
+      const monthDiff = today.getMonth() - dobDate.getMonth();
+      
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate())) {
+        age--;
+      }
+      
+      if (age < 0) {
+        newErrors.dob = 'Date of birth cannot be in the future';
+      } else if (age > 120) {
+        newErrors.dob = 'Please enter a valid date of birth';
+      }
+    }
+
+    // File validation
+    if (!file) {
+      newErrors.file = 'Please select a file to upload';
+    } else {
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        newErrors.file = 'File size must be less than 10MB';
+      }
+      
+      const allowedTypes = ['.pdf', '.jpg', '.jpeg', '.png'];
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!allowedTypes.includes(fileExtension)) {
+        newErrors.file = 'Only PDF, JPG, JPEG, and PNG files are allowed';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
+      // Clear file error when user selects a file
+      if (errors.file) {
+        setErrors(prev => ({ ...prev, file: '' }));
+      }
     }
+  };
+
+  const handleBlur = (fieldName: string) => {
+    setTouched(prev => ({ ...prev, [fieldName]: true }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) {
-      alert('Please select a file to upload');
+    
+    if (!validateForm()) {
       return;
     }
 
@@ -40,9 +116,9 @@ export default function UploadPage() {
     
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('file', file);
-      formDataToSend.append('firstName', formData.firstName);
-      formDataToSend.append('lastName', formData.lastName);
+      formDataToSend.append('file', file!);
+      formDataToSend.append('firstName', formData.firstName.trim());
+      formDataToSend.append('lastName', formData.lastName.trim());
       formDataToSend.append('dob', formData.dob);
       formDataToSend.append('processingMethod', formData.processingMethod);
 
@@ -55,14 +131,28 @@ export default function UploadPage() {
         const result = await response.json();
         router.push(`/results/${result.jobId}`);
       } else {
-        throw new Error('Upload failed');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Upload failed');
       }
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Upload failed. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Upload failed. Please try again.';
+      setErrors({ submit: errorMessage });
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const getFieldError = (fieldName: string) => {
+    return touched[fieldName] && errors[fieldName];
+  };
+
+  const getFieldClassName = (fieldName: string) => {
+    const baseClass = "w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white transition-colors duration-200";
+    const errorClass = "border-red-500 focus:border-red-500";
+    const normalClass = "border-gray-300 dark:border-gray-600 focus:border-red-500";
+    
+    return `${baseClass} ${getFieldError(fieldName) ? errorClass : normalClass}`;
   };
 
   return (
@@ -95,9 +185,11 @@ export default function UploadPage() {
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
+                  onBlur={() => handleBlur('firstName')}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
+                  className={getFieldClassName('firstName')}
                 />
+                {getFieldError('firstName') && <p className="text-red-500 text-xs mt-1">{getFieldError('firstName')}</p>}
               </div>
               
               <div>
@@ -110,9 +202,11 @@ export default function UploadPage() {
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
+                  onBlur={() => handleBlur('lastName')}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
+                  className={getFieldClassName('lastName')}
                 />
+                {getFieldError('lastName') && <p className="text-red-500 text-xs mt-1">{getFieldError('lastName')}</p>}
               </div>
             </div>
 
@@ -126,9 +220,11 @@ export default function UploadPage() {
                 name="dob"
                 value={formData.dob}
                 onChange={handleInputChange}
+                onBlur={() => handleBlur('dob')}
                 required
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
+                className={getFieldClassName('dob')}
               />
+              {getFieldError('dob') && <p className="text-red-500 text-xs mt-1">{getFieldError('dob')}</p>}
             </div>
 
             <div>
@@ -140,11 +236,13 @@ export default function UploadPage() {
                 name="processingMethod"
                 value={formData.processingMethod}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
+                onBlur={() => handleBlur('processingMethod')}
+                className={getFieldClassName('processingMethod')}
               >
                 <option value="standard">Standard Extraction</option>
                 <option value="ai">AI Extraction</option>
               </select>
+              {getFieldError('processingMethod') && <p className="text-red-500 text-xs mt-1">{getFieldError('processingMethod')}</p>}
             </div>
 
             <div>
@@ -173,6 +271,7 @@ export default function UploadPage() {
                             type="file"
                             className="sr-only"
                             onChange={handleFileChange}
+                            onBlur={() => handleBlur('file')}
                             accept=".pdf,.jpg,.jpeg,.png"
                           />
                         </label>
@@ -183,7 +282,10 @@ export default function UploadPage() {
                   )}
                 </div>
               </div>
+              {getFieldError('file') && <p className="text-red-500 text-xs mt-1">{getFieldError('file')}</p>}
             </div>
+
+            {errors.submit && <p className="text-red-500 text-xs mt-1">{errors.submit}</p>}
 
             <Button
               type="submit"

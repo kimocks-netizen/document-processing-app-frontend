@@ -172,15 +172,6 @@ export default function DocumentsPage() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleDownload(doc)}
-                        className="hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-200"
-                      >
-                        <Download className="w-4 h-4 mr-1" />
-                        Download
-                      </Button>
-                      <Button 
                         size="sm"
                         onClick={() => handleViewResults(doc)}
                         className="hover:scale-105 transition-transform duration-200"
