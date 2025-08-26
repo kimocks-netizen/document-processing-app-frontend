@@ -322,7 +322,12 @@ export default function ResultsPage() {
                             <FileText className="w-5 h-5 text-blue-600" />
                           </div>
                           <div>
-                            <h3 className="font-medium">{job.fileName}</h3>
+                            <h3 className="font-medium">
+                              <span className="sm:hidden" title={job.fileName}>
+                                {job.fileName.length > 10 ? `${job.fileName.substring(0, 10)}...` : job.fileName}
+                              </span>
+                              <span className="hidden sm:inline">{job.fileName}</span>
+                            </h3>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
                               {job.processingMethod === 'ai' ? 'AI Extraction' : 'Standard Extraction'} processing
                             </p>
@@ -590,11 +595,11 @@ export default function ResultsPage() {
                 )}
               </div>
 
-              {/* Standard Extraction Results */}
+              {/* Extraction Results */}
               <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-700">
                 <h4 className="font-semibold text-green-800 dark:text-green-200 mb-4 flex items-center">
                   <FileText className="w-5 h-5 mr-2" />
-                  Standard Extraction Results
+                  Extraction Results
                 </h4>
                 {loadingComparison ? (
                   <div className="text-center py-8">

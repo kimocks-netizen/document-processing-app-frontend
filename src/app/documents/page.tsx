@@ -113,7 +113,12 @@ export default function DocumentsPage() {
                         <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                       </div>
                       <div>
-                        <h3 className="font-medium text-gray-900 dark:text-white">{job.fileName}</h3>
+                        <h3 className="font-medium text-gray-900 dark:text-white">
+                          <span className="sm:hidden" title={job.fileName}>
+                            {job.fileName.length > 10 ? `${job.fileName.substring(0, 10)}...` : job.fileName}
+                          </span>
+                          <span className="hidden sm:inline">{job.fileName}</span>
+                        </h3>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           {getFileSize(job.fileName)} • {job.processingMethod === 'ai' ? 'AI Extraction' : 'Standard Extraction'} processing
                         </p>
