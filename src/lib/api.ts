@@ -1,7 +1,8 @@
 // frontend/lib/api.ts
 import { JobState } from '@/store/slices/jobSlice';
+import { getApiUrl } from './env';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE_URL = getApiUrl();
 
 export interface UploadResponse {
   message: string;
@@ -43,6 +44,28 @@ export const api = {
     }
 
     return response.json();
+  },
+
+  async getAllResults(): Promise<{ jobs: any[] }> {
+    const response = await fetch(`${API_BASE_URL}/api/results`);
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error || 'Failed to fetch results');
+    }
+
+    return response.json();
+  },
+
+  async deleteJob(jobId: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/api/results/${jobId}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error || 'Failed to delete job');
+    }
   },
 
   async healthCheck(): Promise<{ status: string }> {

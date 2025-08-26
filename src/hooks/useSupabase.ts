@@ -1,8 +1,9 @@
 // src/hooks/useSupabase.ts
 import { createClient } from '@supabase/supabase-js';
+import { getSupabaseUrl, getSupabaseKey } from '@/lib/env';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://biklzpyuarncssdbwfmk.supabase.co';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpa2x6cHl1YXJuY3NzZGJ3Zm1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU5MjQzMDAsImV4cCI6MjA3MTUwMDMwMH0.LYCQhm6L3RHoTW-G3KbpTOLQuGJf4gzHatjzlzYJAKs';
+const supabaseUrl = getSupabaseUrl();
+const supabaseKey = getSupabaseKey();
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
