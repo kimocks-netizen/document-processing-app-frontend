@@ -62,6 +62,11 @@ const Navbar = () => {
                   Document History
                 </Button>
               </Link>
+              <Link href="/report">
+                <Button variant="ghost" className="text-white hover:bg-white/20">
+                  Report
+                </Button>
+              </Link>
               
               <Button
                 variant="ghost"
@@ -131,6 +136,11 @@ const Navbar = () => {
               <Link href="/documents" onClick={() => setIsOpen(false)}>
                 <Button variant="ghost" className="w-full text-white hover:bg-white/20 justify-start">
                   Document History
+                </Button>
+              </Link>
+              <Link href="/report" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" className="w-full text-white hover:bg-white/20 justify-start">
+                  Report
                 </Button>
               </Link>
             </div>

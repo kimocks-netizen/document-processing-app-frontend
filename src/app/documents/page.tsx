@@ -110,19 +110,14 @@ export default function DocumentsPage() {
   );
 
   const handleDownload = (doc: any) => {
-    // TODO: Implement actual download functionality
+    // 
     console.log('Downloading:', doc.fileName);
-    // This would typically call an API endpoint to get the file
+    // This will call an API endpoint to get the file
     // For now, we'll show an alert
     alert(`Downloading ${doc.fileName}...`);
   };
 
-  const handleViewResults = (doc: any) => {
-    // TODO: Navigate to results page or show results modal
-    console.log('Viewing results for:', doc.fileName);
-    // This would typically navigate to a results page
-    alert(`Viewing results for ${doc.fileName}...`);
-  };
+
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -170,15 +165,7 @@ export default function DocumentsPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Button 
-                        size="sm"
-                        onClick={() => handleViewResults(doc)}
-                        className="hover:scale-105 transition-transform duration-200"
-                      >
-                        View Results
-                      </Button>
-                    </div>
+
                   </div>
                   
                   <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 grid grid-cols-1 md:grid-cols-3 gap-4">

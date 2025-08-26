@@ -40,7 +40,7 @@ export default function ResultsPage() {
 
   const fetchAllJobs = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.yourdomain.com'}/api/results`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/results`);
       if (response.ok) {
         const data = await response.json();
         setJobs(data.jobs || []);
@@ -110,7 +110,7 @@ export default function ResultsPage() {
     
     try {
       // Fetch the actual processing results for this job
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.yourdomain.com'}/api/results/${job.jobId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/results/${job.jobId}`);
       if (response.ok) {
         const data = await response.json();
         setComparisonData(data);
@@ -141,7 +141,7 @@ export default function ResultsPage() {
     
     setDeleting(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.yourdomain.com'}/api/results/${jobToDelete.jobId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/results/${jobToDelete.jobId}`, {
         method: 'DELETE',
       });
 
@@ -168,9 +168,11 @@ export default function ResultsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Processing Results</h1>
-        <div className="text-center py-8">Loading...</div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading processing results...</p>
+        </div>
       </div>
     );
   }

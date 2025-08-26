@@ -49,7 +49,7 @@ export default function ResultsPage() {
 
   const fetchResults = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.yourdomain.com'}/api/results/${jobId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/results/${jobId}`);
       if (response.ok) {
         const data = await response.json();
         
@@ -85,7 +85,7 @@ export default function ResultsPage() {
     }
   }, [jobId, result?.status]);
 
-const renderAIResults = (aiData: AIExtractedData) => {
+  const renderAIResults = (aiData: AIExtractedData) => {
   if (!aiData) return null;
 
   return (

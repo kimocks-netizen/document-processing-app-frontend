@@ -122,7 +122,7 @@ export default function UploadPage() {
       formDataToSend.append('dob', formData.dob);
       formDataToSend.append('processingMethod', formData.processingMethod);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.yourdomain.com'}/api/upload`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/upload`, {
         method: 'POST',
         body: formDataToSend,
       });
