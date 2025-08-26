@@ -34,6 +34,8 @@ export default function ResultsPage() {
   const [jobToDelete, setJobToDelete] = useState<ProcessingJob | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
+  const [showNameModal, setShowNameModal] = useState(false);
+  const [selectedFileName, setSelectedFileName] = useState('');
 
   useEffect(() => {
     fetchAllJobs();
@@ -323,8 +325,22 @@ export default function ResultsPage() {
                           </div>
                           <div>
                             <h3 className="font-medium">
-                              <span className="sm:hidden" title={job.fileName}>
-                                {job.fileName.length > 10 ? `${job.fileName.substring(0, 10)}...` : job.fileName}
+                              <span className="sm:hidden">
+                                {job.fileName.length > 10 ? (
+                                  <>
+                                    {job.fileName.substring(0, 10)}
+                                    <button 
+                                      onClick={() => {
+                                        setSelectedFileName(job.fileName);
+                                        setShowNameModal(true);
+                                      }}
+                                      className="text-blue-600 hover:text-blue-800 ml-1 text-sm"
+                                      title={job.fileName}
+                                    >
+                                      View
+                                    </button>
+                                  </>
+                                ) : job.fileName}
                               </span>
                               <span className="hidden sm:inline">{job.fileName}</span>
                             </h3>
@@ -757,6 +773,33 @@ export default function ResultsPage() {
           </div>
         </div>
       </Modal>
+
+      {/* Document Name Modal */}
+      {showNameModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-md">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Full Document Name
+              </h3>
+            </div>
+            <div className="p-4">
+              <p className="text-gray-700 dark:text-gray-300 break-all">
+                {selectedFileName}
+              </p>
+            </div>
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+              <Button
+                onClick={() => setShowNameModal(false)}
+                variant="outline"
+                size="sm"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

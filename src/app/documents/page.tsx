@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, FileText, Calendar, User, Eye } from 'lucide-react';
+import { Search, FileText, Calendar, User, Eye, Download, X } from 'lucide-react';
 import Link from 'next/link';
 
 interface ProcessingJob {
@@ -23,6 +23,12 @@ export default function DocumentsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
+  const [isDocumentModalOpen, setIsDocumentModalOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<ProcessingJob | null>(null);
+  const [documentData, setDocumentData] = useState<any>(null);
+  const [loadingDocument, setLoadingDocument] = useState(false);
+  const [showNameModal, setShowNameModal] = useState(false);
+  const [selectedFileName, setSelectedFileName] = useState('');
 
   useEffect(() => {
     fetchAllJobs();
@@ -60,6 +66,48 @@ export default function DocumentsPage() {
     if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) return '1.8 MB';
     if (fileName.endsWith('.png')) return '3.2 MB';
     return '1.5 MB';
+  };
+
+  const handleViewDocument = async (job: ProcessingJob) => {
+    setSelectedDocument(job);
+    setIsDocumentModalOpen(true);
+    setLoadingDocument(true);
+    
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/results/${job.jobId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setDocumentData(data);
+      } else {
+        console.error('Failed to fetch document data');
+        setDocumentData(null);
+      }
+    } catch (error) {
+      console.error('Error fetching document data:', error);
+      setDocumentData(null);
+    } finally {
+      setLoadingDocument(false);
+    }
+  };
+
+  const closeDocumentModal = () => {
+    setIsDocumentModalOpen(false);
+    setSelectedDocument(null);
+    setDocumentData(null);
+  };
+
+  const handleDownloadDocument = () => {
+    if (documentData?.fileUrl && selectedDocument) {
+      const link = document.createElement('a');
+      link.href = documentData.fileUrl;
+      link.download = selectedDocument.fileName;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      alert('Document not available for download');
+    }
   };
 
   if (loading) {
@@ -114,23 +162,39 @@ export default function DocumentsPage() {
                       </div>
                       <div>
                         <h3 className="font-medium text-gray-900 dark:text-white">
-                          <span className="sm:hidden" title={job.fileName}>
-                            {job.fileName.length > 10 ? `${job.fileName.substring(0, 10)}...` : job.fileName}
+                          <span className="sm:hidden">
+                            {job.fileName.length > 10 ? (
+                              <>
+                                {job.fileName.substring(0, 10)}
+                                <button 
+                                  onClick={() => {
+                                    setSelectedFileName(job.fileName);
+                                    setShowNameModal(true);
+                                  }}
+                                  className="text-blue-600 hover:text-blue-800 ml-1 text-sm"
+                                  title={job.fileName}
+                                >
+                                  View
+                                </button>
+                              </>
+                            ) : job.fileName}
                           </span>
                           <span className="hidden sm:inline">{job.fileName}</span>
                         </h3>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {getFileSize(job.fileName)} • {job.processingMethod === 'ai' ? 'AI Extraction' : 'Standard Extraction'} processing
+                          {getFileSize(job.fileName)} • {job.processingMethod === 'ai' ? 'Smart Extraction' : 'Standard Extraction'} processing
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Link href={`/results/${job.jobId}`}>
-                        <Button size="sm" className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white hover:scale-105 transition-transform duration-200 shadow-lg">
-                          <Eye className="w-4 h-4 sm:mr-1" />
-                          <span className="hidden sm:inline">View</span>
-                        </Button>
-                      </Link>
+                      <Button 
+                        size="sm" 
+                        onClick={() => handleViewDocument(job)}
+                        className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white hover:scale-105 transition-transform duration-200 shadow-lg"
+                      >
+                        <Eye className="w-4 h-4 sm:mr-1" />
+                        <span className="hidden sm:inline">View</span>
+                      </Button>
                     </div>
                   </div>
                   
@@ -218,6 +282,145 @@ export default function DocumentsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Document Viewer Modal */}
+      {isDocumentModalOpen && selectedDocument && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-6xl max-h-[80vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                Document Viewer: {selectedDocument.fileName}
+              </h2>
+              <div className="flex items-center space-x-2">
+                <Button
+                  onClick={handleDownloadDocument}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  size="sm"
+                >
+                  <Download className="w-4 h-4 mr-1" />
+                  Download
+                </Button>
+                <Button
+                  onClick={closeDocumentModal}
+                  variant="outline"
+                  size="sm"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            
+            <div className="p-4 overflow-y-auto max-h-[calc(80vh-80px)]">
+              {loadingDocument ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 dark:text-gray-400">Loading document...</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Extracted Text */}
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                    <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-4 flex items-center">
+                      <FileText className="w-5 h-5 mr-2" />
+                      Extracted Text
+                    </h3>
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded border border-blue-300 dark:border-blue-600 max-h-96 overflow-y-auto">
+                      <div className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                        {documentData?.rawText || 'No extracted text available'}
+                      </div>
+                    </div>
+                    
+                    {/* Extracted Information */}
+                    {documentData && (
+                      <div className="mt-4 space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">
+                            Full Name
+                          </label>
+                          <div className="bg-white dark:bg-gray-800 p-2 rounded border border-blue-300 dark:border-blue-600 text-blue-900 dark:text-blue-100">
+                            {documentData.fullName || 'Not extracted'}
+                          </div>
+                        </div>
+                        {documentData.age && (
+                          <div>
+                            <label className="block text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">
+                              Age
+                            </label>
+                            <div className="bg-white dark:bg-gray-800 p-2 rounded border border-blue-300 dark:border-blue-600 text-blue-900 dark:text-blue-100">
+                              {documentData.age} years
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Original Document */}
+                  <div className="bg-gray-50 dark:bg-gray-900/20 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
+                      <Eye className="w-5 h-5 mr-2" />
+                      Original Document
+                    </h3>
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded border border-gray-300 dark:border-gray-600 h-[600px] overflow-y-auto">
+                      {documentData?.fileUrl ? (
+                        selectedDocument.fileName.toLowerCase().endsWith('.pdf') ? (
+                          <iframe
+                            src={documentData.fileUrl}
+                            className="w-full h-full border-0"
+                            title="PDF Document"
+                          />
+                        ) : (
+                          <img
+                            src={documentData.fileUrl}
+                            alt="Document"
+                            className="w-full h-full object-contain"
+                          />
+                        )
+                      ) : (
+                        <div className="flex items-center justify-center h-full">
+                          <div className="text-center">
+                            <FileText className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                            <p className="text-gray-600 dark:text-gray-400">
+                              Document not available
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Document Name Modal */}
+      {showNameModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-md">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Full Document Name
+              </h3>
+            </div>
+            <div className="p-4">
+              <p className="text-gray-700 dark:text-gray-300 break-all">
+                {selectedFileName}
+              </p>
+            </div>
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+              <Button
+                onClick={() => setShowNameModal(false)}
+                variant="outline"
+                size="sm"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
