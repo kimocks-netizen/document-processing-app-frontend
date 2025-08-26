@@ -1,8 +1,8 @@
 // frontend/lib/api.ts
 import { JobState } from '@/store/slices/jobSlice';
-import { getApiUrl } from './env';
+import { getCurrentApiUrl } from './env';
 
-const API_BASE_URL = getApiUrl();
+const API_BASE_URL = getCurrentApiUrl();
 
 export interface UploadResponse {
   message: string;
@@ -22,6 +22,8 @@ export interface ResultsResponse {
 
 export const api = {
   async uploadDocument(formData: FormData): Promise<UploadResponse> {
+    console.log('Uploading to:', `${API_BASE_URL}/api/upload`);
+    
     const response = await fetch(`${API_BASE_URL}/api/upload`, {
       method: 'POST',
       body: formData,
@@ -36,6 +38,8 @@ export const api = {
   },
 
   async getResults(jobId: string): Promise<ResultsResponse> {
+    console.log('Fetching results from:', `${API_BASE_URL}/api/results/${jobId}`);
+    
     const response = await fetch(`${API_BASE_URL}/api/results/${jobId}`);
 
     if (!response.ok) {
@@ -47,6 +51,8 @@ export const api = {
   },
 
   async getAllResults(): Promise<{ jobs: any[] }> {
+    console.log('Fetching all results from:', `${API_BASE_URL}/api/results`);
+    
     const response = await fetch(`${API_BASE_URL}/api/results`);
 
     if (!response.ok) {
@@ -58,6 +64,8 @@ export const api = {
   },
 
   async deleteJob(jobId: string): Promise<void> {
+    console.log('Deleting job from:', `${API_BASE_URL}/api/results/${jobId}`);
+    
     const response = await fetch(`${API_BASE_URL}/api/results/${jobId}`, {
       method: 'DELETE',
     });
@@ -69,6 +77,8 @@ export const api = {
   },
 
   async healthCheck(): Promise<{ status: string }> {
+    console.log('Health check to:', `${API_BASE_URL}/api/health`);
+    
     const response = await fetch(`${API_BASE_URL}/api/health`);
     
     if (!response.ok) {

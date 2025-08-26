@@ -13,6 +13,7 @@ A modern, responsive Next.js frontend application for processing documents with 
 - **File Management**: Secure upload and storage with Supabase
 - **Analytics Dashboard**: Comprehensive reporting and insights
 - **Comparison Tools**: Side-by-side AI vs Standard extraction analysis
+- **Smart Environment Detection**: Automatically switches between local and production APIs
 
 ## 🛠️ Tech Stack
 
@@ -47,40 +48,61 @@ cd document-processing-app-frontend
 # Install dependencies
 npm install
 
-# Create environment file
-cp env.local.example env.local
+# Create environment file for local development
+cp .env.example .env.local
 
-# Configure environment variables
-# Edit env.local with your credentials
+# Configure environment variables in .env.local
+NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 # Start development server
 npm run dev
 ```
+
+### **Production Deployment (Vercel)**
+
+The application automatically detects production environments and uses the correct backend API:
+
+1. **Deploy to Vercel** - The app automatically detects Vercel and uses `https://backend-document-processing-app.fly.dev`
+2. **No environment variables needed** - Smart detection handles everything
+3. **Works out of the box** - Just deploy and it works!
 
 ### **Docker Deployment**
 
 ```bash
 # Build and run with Docker
 docker build -t doc-processor-frontend .
-docker run -d -p 3000:3000 --env-file env.local doc-processor-frontend
+docker run -d -p 3000:3000 --env-file env.production doc-processor-frontend
 
 # Or use Docker Compose from project root
 cd ..
-docker-compose --env-file env.local up -d --build
+docker-compose --env-file env.production up -d --build
 ```
 
 ## ⚙️ Environment Variables
 
-Create an `env.local` file with the following variables:
-
+### **Local Development (.env.local)**
 ```bash
-# API Configuration
+# Only needed for local development
 NEXT_PUBLIC_API_URL=http://localhost:3001
-
-# Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
+
+### **Production (Automatic)**
+- **No environment variables needed** in Vercel
+- **Automatically detects** production domains
+- **Uses Fly.io backend** (`https://backend-document-processing-app.fly.dev`)
+
+### **Smart Environment Detection**
+
+The application automatically detects your environment:
+
+- **🏠 Localhost**: Uses `http://localhost:3001`
+- **🚀 Vercel**: Automatically uses `https://backend-document-processing-app.fly.dev`
+- **🌐 Any Production Domain**: Automatically uses Fly.io backend
+- **🔧 Manual Override**: Environment variables (only for localhost)
 
 ## 🏗️ Project Structure
 
@@ -88,24 +110,79 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 document-processing-app-frontend/
 ├── src/
 │   ├── app/                    # Next.js App Router pages
-│   │   ├── page.tsx           # Home page
-│   │   ├── upload/            # Document upload
-│   │   ├── documents/         # Document history
-│   │   ├── results/           # Processing results
-│   │   └── report/            # Analytics dashboard
-│   ├── components/            # Reusable UI components
-│   │   ├── common/            # Shared components
-│   │   ├── forms/             # Form components
-│   │   └── ui/                # Shadcn UI components
-│   ├── hooks/                 # Custom React hooks
-│   ├── lib/                   # Utility libraries
-│   ├── store/                 # Zustand state management
-│   └── types/                 # TypeScript type definitions
-├── public/                    # Static assets
-├── Dockerfile                 # Docker configuration
-├── next.config.js            # Next.js configuration
-├── tailwind.config.js        # Tailwind CSS configuration
-└── package.json              # Dependencies and scripts
+│   │   ├── layout.tsx           # Root layout with theme provider
+│   │   ├── page.tsx             # Home page with hero section
+│   │   ├── globals.css          # Global Tailwind CSS styles
+│   │   ├── favicon.ico          # App favicon
+│   │   ├── upload/              # Document upload form
+│   │   ├── documents/           # Document history view
+│   │   ├── results/             # Processing results with comparison
+│   │   ├── report/              # Analytics dashboard
+│   │   └── api/                 # API routes
+│   │       ├── health/          # Health check endpoint
+│   │       └── upload/          # Upload endpoint
+│   ├── components/              # Reusable UI components
+│   │   ├── common/              # Shared components
+│   │   │   ├── Navbar.tsx       # Navigation with mobile menu
+│   │   │   ├── Footer.tsx       # Application footer
+│   │   │   ├── ProgressBar.tsx  # Progress indicators
+│   │   │   └── ErrorBanner.tsx  # Error display
+│   │   ├── forms/               # Form components
+│   │   │   └── UploadForm.tsx   # Document upload form
+│   │   ├── results/             # Results display components
+│   │   │   ├── StandardPanel.tsx # Standard extraction results
+│   │   │   ├── AIPanel.tsx      # AI extraction results
+│   │   │   └── CompareView.tsx  # Side-by-side comparison
+│   │   ├── ui/                  # Shadcn UI components
+│   │   │   ├── button.tsx       # Button component
+│   │   │   ├── card.tsx         # Card component
+│   │   │   ├── input.tsx        # Input component
+│   │   │   └── tabs.tsx         # Tabs component
+│   │   ├── Modal.tsx            # Reusable modal component
+│   │   └── Layout.tsx           # Page layout wrapper
+│   ├── store/                   # Zustand state management
+│   │   ├── index.ts             # Store configuration
+│   │   ├── hooks.ts             # Typed store hooks
+│   │   └── slices/              # State slices
+│   │       ├── jobSlice.ts      # Job processing state
+│   │       ├── resultsSlice.ts  # Results and filtering state
+│   │       ├── themeSlice.ts    # Theme preferences
+│   │       └── uploadSlice.ts   # Upload progress state
+│   ├── hooks/                   # Custom React hooks
+│   │   ├── useSupabase.ts       # Supabase client hook
+│   │   ├── useThemeToggle.ts    # Theme switching hook
+│   │   └── useWebSocket.ts      # WebSocket connection hook
+│   ├── layout/                  # Layout and theme configuration
+│   │   ├── ThemeContext.tsx     # Theme context provider
+│   │   ├── Providers.tsx        # App providers wrapper
+│   │   └── palettes.ts          # Color palette definitions
+│   ├── lib/                     # Utility libraries
+│   │   ├── api.ts               # API client functions
+│   │   ├── constants.ts         # Application constants
+│   │   ├── mappers.ts           # Data transformation utilities
+│   │   ├── utils.ts             # General utility functions
+│   │   └── env.ts               # Environment detection utilities
+│   └── types/                   # TypeScript type definitions
+│       └── html2pdf.d.ts        # html2pdf.js type declarations
+├── public/                      # Static assets
+│   ├── file.svg                 # File icon
+│   ├── globe.svg                # Globe icon
+│   ├── next.svg                 # Next.js logo
+│   ├── vercel.svg               # Vercel logo
+│   └── window.svg               # Window icon
+├── Dockerfile                   # Docker configuration
+├── next.config.js               # Next.js configuration
+├── tailwind.config.js           # Tailwind CSS configuration
+├── postcss.config.js            # PostCSS configuration
+├── tsconfig.json                # TypeScript configuration
+├── eslint.config.mjs            # ESLint configuration
+├── package.json                  # Dependencies and scripts
+├── package-lock.json            # Locked dependency versions
+├── vercel.json                  # Vercel configuration
+├── .gitignore                   # Git ignore rules
+├── plans.txt                    # Development plans
+├── README.md                    # This file
+└── tree.txt                     # File structure
 ```
 
 ## 📱 Pages & Features
@@ -157,6 +234,7 @@ document-processing-app-frontend/
 - **Footer**: Application footer with links and information
 - **Toast**: Notification system for user feedback
 - **ProgressBar**: Upload and processing indicators
+- **EnvironmentBanner**: Shows current environment and API
 
 ## 🔄 State Management
 
@@ -180,11 +258,17 @@ document-processing-app-frontend/
 ### **Available Scripts**
 
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run type-check   # TypeScript type checking
+npm run dev              # Start development server
+npm run dev:local        # Start with local backend (localhost:3001)
+npm run dev:prod         # Start with production backend (Fly.io)
+npm run build            # Build for production
+npm run build:local      # Build for local development
+npm run build:prod       # Build for production
+npm run start            # Start production server
+npm run start:local      # Start with local configuration
+npm run start:prod       # Start with production configuration
+npm run lint             # Run ESLint
+npm run type-check       # TypeScript type checking
 ```
 
 ### **Code Quality**
@@ -209,7 +293,7 @@ npm run type-check   # TypeScript type checking
 docker build -t doc-processor-frontend .
 
 # Run container
-docker run -d -p 3000:3000 --env-file env.local doc-processor-frontend
+docker run -d -p 3000:3000 --env-file env.production doc-processor-frontend
 
 # View logs
 docker logs <container_name>
@@ -251,7 +335,7 @@ npm run test:e2e
 2. **Environment Variables**
    ```bash
    # Verify env.local exists
-   ls -la env.local
+   ls -la .env.local
    
    # Check variable loading
    echo $NEXT_PUBLIC_API_URL
@@ -264,6 +348,12 @@ npm run test:e2e
    
    # Kill conflicting process
    kill -9 <PID>
+   ```
+
+4. **API URL Issues**
+   ```bash
+   # Check browser console for API URL logs
+   # Should show: "Current API URL: https://backend-document-processing-app.fly.dev"
    ```
 
 ### **Development Server Issues**
@@ -325,7 +415,22 @@ For issues and questions:
 - Review browser console for errors
 - Verify environment variables
 - Ensure backend service is running
+- Check environment banner for current API URL
+
+## 🌍 Environment Detection
+
+The application automatically detects your environment and uses the appropriate backend:
+
+### **Automatic Detection**
+- **🏠 Localhost**: `http://localhost:3001`
+- **🚀 Vercel**: `https://backend-document-processing-app.fly.dev`
+- **🌐 Any Production Domain**: `https://backend-document-processing-app.fly.dev`
+
+### **No Configuration Needed**
+- **Just deploy to Vercel** - it works automatically
+- **No environment variables** needed in production
+- **Smart detection** handles everything
 
 ---
 
-**Note**: This frontend application requires the Document Processing Backend API to be running for full functionality. Ensure both services are properly configured and connected.
+**Note**: This frontend application requires the Document Processing Backend API to be running for full functionality. The backend is automatically detected and connected based on your deployment environment.
