@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FileText, Clock, CheckCircle, XCircle, ChevronUp, ChevronDown, SortAsc, Search, Download, Calendar, User, BarChart3, Trash2 } from 'lucide-react';
+import { FileText, Clock, CheckCircle, XCircle, ChevronUp, ChevronDown, SortAsc, Search, Download, Calendar, User, BarChart3, Trash2, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,10 +33,24 @@ export default function ResultsPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [jobToDelete, setJobToDelete] = useState<ProcessingJob | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAllJobs();
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownOpen && !(event.target as Element).closest('.dropdown-container')) {
+        setDropdownOpen(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownOpen]);
 
   const fetchAllJobs = async () => {
     try {
@@ -164,6 +178,25 @@ export default function ResultsPage() {
   const cancelDelete = () => {
     setIsDeleteModalOpen(false);
     setJobToDelete(null);
+  };
+
+  const handleDropdownToggle = (jobId: string) => {
+    setDropdownOpen(dropdownOpen === jobId ? null : jobId);
+  };
+
+  const handleActionClick = (action: string, job: ProcessingJob) => {
+    setDropdownOpen(null);
+    switch (action) {
+      case 'view':
+        window.location.href = `/results/${job.jobId}`;
+        break;
+      case 'comparison':
+        handleComparison(job);
+        break;
+      case 'delete':
+        handleDelete(job);
+        break;
+    }
   };
 
   if (loading) {
@@ -295,11 +328,11 @@ export default function ResultsPage() {
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        {/* Desktop Actions */}
+                        <div className="hidden sm:flex items-center space-x-2">
                           <Link href={`/results/${job.jobId}`}>
                             <Button size="sm" className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white hover:scale-105 transition-transform duration-200 shadow-lg">
-                              <span className="hidden sm:inline">View Results</span>
-                              <span className="sm:hidden">View</span>
+                              View Results
                             </Button>
                           </Link>
                           <Button 
@@ -312,17 +345,62 @@ export default function ResultsPage() {
                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             }`}
                           >
-                            <BarChart3 className="w-4 h-4 sm:mr-1" />
-                            <span className="hidden sm:inline">Comparison</span>
+                            <BarChart3 className="w-4 h-4 mr-1" />
+                            Comparison
                           </Button>
                           <Button 
                             size="sm"
                             onClick={() => handleDelete(job)}
                             className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white hover:scale-105 transition-transform duration-200 shadow-lg"
                           >
-                            <Trash2 className="w-4 h-4 sm:mr-1" />
-                            <span className="hidden sm:inline">Delete</span>
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            Delete
                           </Button>
+                        </div>
+
+                        {/* Mobile Dropdown */}
+                        <div className="sm:hidden relative dropdown-container">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDropdownToggle(job.jobId)}
+                            className="p-2"
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                          
+                          {dropdownOpen === job.jobId && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg z-50 border border-gray-200 dark:border-gray-700">
+                              <div className="py-1">
+                                <button
+                                  onClick={() => handleActionClick('view', job)}
+                                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                >
+                                  <FileText className="w-4 h-4 mr-2" />
+                                  View Results
+                                </button>
+                                <button
+                                  onClick={() => handleActionClick('comparison', job)}
+                                  disabled={job.processingMethod === 'standard'}
+                                  className={`flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                                    job.processingMethod === 'standard'
+                                      ? 'text-gray-400 cursor-not-allowed'
+                                      : 'text-gray-700 dark:text-gray-300'
+                                  }`}
+                                >
+                                  <BarChart3 className="w-4 h-4 mr-2" />
+                                  Comparison
+                                </button>
+                                <button
+                                  onClick={() => handleActionClick('delete', job)}
+                                  className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                       
