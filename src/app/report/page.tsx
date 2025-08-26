@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, BarChart3, Download, PieChart, TrendingUp } from 'lucide-react';
+import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 // html2pdf will be imported dynamically on client side
 
 interface ProcessingJob {
@@ -30,7 +31,7 @@ export default function ReportPage() {
   const fetchAllJobs = async () => {
     try {
       setError(null);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/results`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/results`);
       if (response.ok) {
         const data = await response.json();
         setJobs(data.jobs || []);
@@ -61,6 +62,8 @@ export default function ReportPage() {
     { name: 'AI Extraction', value: aiJobs, color: '#3B82F6' },
     { name: 'Standard Extraction', value: standardJobs, color: '#10B981' }
   ];
+
+  const COLORS = ['#3B82F6', '#10B981'];
 
   // Status distribution
   const statusCounts = jobs.reduce((acc, job) => {
@@ -100,7 +103,7 @@ export default function ReportPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading report data...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading report data...</p>
         </div>
       </div>
     );
@@ -147,8 +150,8 @@ export default function ReportPage() {
                 <FileText className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Documents</p>
-                <p className="text-2xl font-bold text-gray-900">{totalJobs}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Documents</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalJobs}</p>
               </div>
             </div>
           </CardContent>
@@ -161,8 +164,8 @@ export default function ReportPage() {
                 <BarChart3 className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">AI Extraction</p>
-                <p className="text-2xl font-bold text-gray-900">{aiJobs}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">AI Extraction</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{aiJobs}</p>
                 <p className="text-sm text-green-600">{aiPercentage}%</p>
               </div>
             </div>
@@ -176,8 +179,8 @@ export default function ReportPage() {
                 <TrendingUp className="w-6 h-6 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Standard Extraction</p>
-                <p className="text-2xl font-bold text-gray-900">{standardJobs}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Standard Extraction</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{standardJobs}</p>
                 <p className="text-sm text-purple-600">{standardPercentage}%</p>
               </div>
             </div>
@@ -191,8 +194,8 @@ export default function ReportPage() {
                 <PieChart className="w-6 h-6 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Most Used Method</p>
-                <p className="text-lg font-bold text-gray-900">{mostUsedMethod}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Most Used Method</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-white">{mostUsedMethod}</p>
               </div>
             </div>
           </CardContent>
@@ -212,52 +215,35 @@ export default function ReportPage() {
           </CardHeader>
           <CardContent>
             <div className="h-80">
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <div className="relative w-48 h-48 mx-auto mb-4">
-                    {/* Simple pie chart visualization */}
-                    {totalJobs > 0 ? (
-                      <>
-                        {/* AI Extraction slice */}
-                        {aiJobs > 0 && (
-                          <div className="absolute inset-0 rounded-full border-8 border-blue-500" 
-                               style={{ 
-                                 clipPath: `polygon(50% 50%, 50% 0%, ${50 + (aiJobs / totalJobs) * 50}% 0%, ${50 + (aiJobs / totalJobs) * 50}% 50%)` 
-                               }}></div>
-                        )}
-                        {/* Standard Extraction slice */}
-                        {standardJobs > 0 && (
-                          <div className="absolute inset-0 rounded-full border-8 border-green-500" 
-                               style={{ 
-                                 clipPath: `polygon(50% 50%, ${50 + (aiJobs / totalJobs) * 50}% 0%, 100% 0%, 100% 50%, 50% 50%)` 
-                               }}></div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="absolute inset-0 rounded-full border-8 border-gray-300"></div>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    {totalJobs > 0 ? (
-                      <>
-                        <div className="flex items-center justify-center space-x-2">
-                          <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                          <span className="text-sm">AI Extraction: {aiJobs} ({aiPercentage}%)</span>
-                        </div>
-                        <div className="flex items-center justify-center space-x-2">
-                          <div className="w-4 h-4 bg-green-500 rounded"></div>
-                          <span className="text-sm">Standard Extraction: {standardJobs} ({standardPercentage}%)</span>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="text-center text-gray-500">
-                        <p>No data available</p>
-                        <p className="text-sm">Upload documents to see analytics</p>
-                      </div>
-                    )}
+              {totalJobs > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsPieChart>
+                    <Pie
+                      data={chartData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => [`${value} documents`, 'Count']} />
+                    <Legend />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full text-center text-gray-500">
+                  <div>
+                    <p>No data available</p>
+                    <p className="text-sm">Upload documents to see analytics</p>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </CardContent>
         </Card>

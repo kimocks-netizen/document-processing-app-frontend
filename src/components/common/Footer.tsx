@@ -11,7 +11,7 @@ const Footer = () => {
               DocProcessor
             </h3>
             <p className="text-gray-300">
-              Advanced document processing with AI-powered extraction capabilities. 
+             Document processing with AI-powered extraction, 
               Transform your documents into structured data efficiently and accurately.
             </p>
           </div>
@@ -49,20 +49,20 @@ const Footer = () => {
 
           <div>
             <h3 className="text-lg font-semibold mb-4 bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
-              Contact & Support
+              Contact
             </h3>
             <div className="space-y-3 text-gray-300">
               <a
-                href="mailto:support@docprocessor.com"
+                href="mailto:kimocks12@gmail.com"
                 className="flex items-center space-x-2 hover:text-red-400 transition-colors"
               >
                 <FaEnvelope className="text-red-500" />
-                <span>support@docprocessor.com</span>
+                <span>kimocks12@gmail.com</span>
               </a>
               
               <div className="flex space-x-4 mt-4">
                 <a
-                  href="https://github.com/docprocessor"
+                  href="https://github.com/kimocks-netizen"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-red-400 transition-colors text-xl"
@@ -70,12 +70,10 @@ const Footer = () => {
                   <FaGithub />
                 </a>
                 <a
-                  href="https://linkedin.com/company/docprocessor"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="mailto:kimocks12@gmail.com"
                   className="hover:text-red-400 transition-colors text-xl"
                 >
-                  <FaLinkedin />
+                  <FaEnvelope />
                 </a>
               </div>
             </div>

@@ -178,12 +178,12 @@ export default function ResultsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Processing Results</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            View your document processing results and download processed files hereeee
+            View your document processing results and download processed files
           </p>
         </div>
         
@@ -298,7 +298,8 @@ export default function ResultsPage() {
                         <div className="flex items-center space-x-2">
                           <Link href={`/results/${job.jobId}`}>
                             <Button size="sm" className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white hover:scale-105 transition-transform duration-200 shadow-lg">
-                              View Results
+                              <span className="hidden sm:inline">View Results</span>
+                              <span className="sm:hidden">View</span>
                             </Button>
                           </Link>
                           <Button 
@@ -311,16 +312,16 @@ export default function ResultsPage() {
                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             }`}
                           >
-                            <BarChart3 className="w-4 h-4 mr-1" />
-                            Comparison
+                            <BarChart3 className="w-4 h-4 sm:mr-1" />
+                            <span className="hidden sm:inline">Comparison</span>
                           </Button>
                           <Button 
                             size="sm"
                             onClick={() => handleDelete(job)}
                             className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white hover:scale-105 transition-transform duration-200 shadow-lg"
                           >
-                            <Trash2 className="w-4 h-4 mr-1" />
-                            Delete
+                            <Trash2 className="w-4 h-4 sm:mr-1" />
+                            <span className="hidden sm:inline">Delete</span>
                           </Button>
                         </div>
                       </div>
