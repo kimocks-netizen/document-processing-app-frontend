@@ -684,20 +684,20 @@ export default function ResultsPage() {
               </div>
             )}
 
-            {/* Accuracy Comparison */}
-            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-              <h4 className="font-semibold text-gray-900 dark:text-white mb-3 text-base">Accuracy Comparison</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="text-center">
-                  <div className="text-xl font-bold text-blue-600 dark:text-blue-400">98.5%</div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">AI Extraction Accuracy</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-green-600 dark:text-green-400">95.2%</div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">Standard Extraction Accuracy</div>
+            {/* AI Document Summary */}
+            {comparisonData?.aiExtractedData?.summary && (
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 rounded-lg border border-blue-200 dark:border-blue-700">
+                <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-4 text-lg flex items-center">
+                  <BarChart3 className="w-5 h-5 mr-2" />
+                  AI Document Summary
+                </h4>
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-blue-300 dark:border-blue-600">
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {comparisonData.aiExtractedData.summary}
+                  </p>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-600">
