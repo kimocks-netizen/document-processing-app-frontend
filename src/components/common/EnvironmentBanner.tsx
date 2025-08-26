@@ -41,7 +41,7 @@ export const EnvironmentBanner = () => {
 
   return (
     <div className={`${getBannerColor()} text-white text-center py-2 px-4 text-sm font-medium`}>
-      🚀 {getEnvironmentText()} Environment - API: {getApiDisplay()}
+      {getEnvironmentText()} Environment - API: {getApiDisplay()}
     </div>
   );
 };
