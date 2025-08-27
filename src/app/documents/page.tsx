@@ -193,7 +193,7 @@ export default function DocumentsPage() {
                         className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white hover:scale-105 transition-transform duration-200 shadow-lg"
                       >
                         <Eye className="w-4 h-4 sm:mr-1" />
-                        <span className="hidden sm:inline">View</span>
+                        <span className="hidden sm:inline">Extracted Vs Original</span>
                       </Button>
                     </div>
                   </div>
