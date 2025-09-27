@@ -1,4 +1,5 @@
  If AI method is used, display both Standard and AI extraction results side-by-side
+
 add search, -DONE
 delete, 
 Download functionality
@@ -20,4 +21,3 @@ e.g 5 documents where genrated 2 from ai, 1 ai image, ocr standad and ai etc
 
 remove: http://localhost:3000
 
-Document History -Hardcoded
