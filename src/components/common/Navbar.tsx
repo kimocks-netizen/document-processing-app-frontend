@@ -4,12 +4,17 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useTheme } from '@/layout/ThemeContext';
+import { useAuth } from '../../context/AuthProvider';
 import { Sun, Moon, FileText, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { UserMenu } from './UserMenu';
+import { AuthModal } from '../auth/AuthModal';
 
 const Navbar = () => {
   const { isDarkMode, toggleTheme } = useTheme();
+  const { isAuthenticated } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const mobileNavRef = useRef<HTMLDivElement>(null);
 
   // Close mobile nav when clicking outside
@@ -81,6 +86,19 @@ const Navbar = () => {
                   <Moon className="h-5 w-5" />
                 )}
               </Button>
+
+              {/* Auth Section */}
+              {isAuthenticated ? (
+                <UserMenu />
+              ) : (
+                <Button
+                  variant="outline"
+                  className="text-white border-white hover:bg-white hover:text-red-800"
+                  onClick={() => setAuthModalOpen(true)}
+                >
+                  Sign In
+                </Button>
+              )}
             </div>
 
             {/* Mobile Toggle */}
@@ -143,10 +161,37 @@ const Navbar = () => {
                   Report
                 </Button>
               </Link>
+
+              {/* Mobile Auth Section */}
+              <div className="pt-4 border-t border-red-600">
+                {isAuthenticated ? (
+                  <div className="flex items-center space-x-2">
+                    <UserMenu />
+                    <span className="text-white text-sm">Account</span>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="w-full text-white border-white hover:bg-white hover:text-red-800"
+                    onClick={() => {
+                      setAuthModalOpen(true);
+                      setIsOpen(false);
+                    }}
+                  >
+                    Sign In
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </>
       )}
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+      />
     </>
   );
 };

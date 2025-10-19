@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, FileText, Calendar, User, Eye, Download, X } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '../../context/AuthProvider';
+import { apiRequest } from '../../services/auth';
 
 interface ProcessingJob {
   jobId: string;
@@ -29,6 +31,7 @@ export default function DocumentsPage() {
   const [loadingDocument, setLoadingDocument] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState('');
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     fetchAllJobs();
@@ -36,10 +39,9 @@ export default function DocumentsPage() {
 
   const fetchAllJobs = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/results`);
-      if (response.ok) {
-        const data = await response.json();
-        setJobs(data.jobs || []);
+      const response = await apiRequest<{ jobs: ProcessingJob[] }>('/results');
+      if (response.success && response.data) {
+        setJobs(response.data.jobs || []);
       }
     } catch (error) {
       console.error('Failed to fetch jobs:', error);
@@ -121,11 +123,31 @@ export default function DocumentsPage() {
     );
   }
 
+  // Show message for non-authenticated users
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-6">
+        <Card>
+          <CardContent className="p-8 text-center">
+            <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-2">Sign in to view your documents</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              You need to be signed in to view your processed documents.
+            </p>
+            <Link href="/auth/login">
+              <Button>Sign In</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Processed Documents</h1>
+          <h1 className="text-3xl font-bold">My Documents</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             View your previously processed documents and results
           </p>

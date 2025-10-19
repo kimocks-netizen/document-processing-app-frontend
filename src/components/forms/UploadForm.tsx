@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTheme } from '@/layout/ThemeContext';
+import { useAuth } from '../../context/AuthProvider';
+import { AuthModal } from '../auth/AuthModal';
 
 interface UploadFormProps {
   onUploadSuccess?: (jobId: string) => void;
@@ -19,16 +21,24 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
     lastName: '',
     dob: '',
     processingMethod: 'standard',
+    keepRecords: false,
   });
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const router = useRouter();
   const { isDarkMode } = useTheme();
+  const { isAuthenticated, user } = useAuth();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({ ...prev, [name]: checked }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -78,6 +88,12 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
       return;
     }
 
+    // If user wants to keep records but is not authenticated, show auth modal
+    if (formData.keepRecords && !isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+
     setIsUploading(true);
     
     try {
@@ -87,6 +103,7 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
       formDataToSend.append('lastName', formData.lastName);
       formDataToSend.append('dob', formData.dob);
       formDataToSend.append('processingMethod', formData.processingMethod);
+      formDataToSend.append('keepRecords', formData.keepRecords.toString());
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/upload`, {
         method: 'POST',
@@ -184,6 +201,28 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
           </div>
 
           <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="keepRecords"
+                name="keepRecords"
+                checked={formData.keepRecords}
+                onChange={handleInputChange}
+                className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+              />
+              <label htmlFor="keepRecords" className="text-sm font-medium">
+                Keep my records for future access
+              </label>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {isAuthenticated 
+                ? "Your processed documents will be saved to your account for easy access later."
+                : "Sign up or log in to save your processed documents to your account."
+              }
+            </p>
+          </div>
+
+          <div className="space-y-2">
             <label className="text-sm font-medium">
               Document File (PDF or Image)
             </label>
@@ -271,6 +310,13 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
           </Button>
         </form>
       </CardContent>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        initialMode="register"
+      />
     </Card>
   );
 };
